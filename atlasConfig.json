@@ -1,0 +1,9 @@
+{
+    "appId": "devicesync-uxjfu",
+    "appUrl": "https://realm.mongodb.com/groups/65c57bb446c23a0a4031a505/apps/65cc00c95a25ecdc19912577",
+    "baseUrl": "https://realm.mongodb.com",
+    "clientApiBaseUrl": "https://eu-west-1.aws.realm.mongodb.com",
+    "dataApiBaseUrl": "https://eu-west-1.aws.data.mongodb-api.com",
+    "dataExplorerLink": "https://cloud.mongodb.com/links/65c57bb446c23a0a4031a505/explorer/Cluster0/database/collection/find",
+    "dataSourceName": "mongodb-atlas"
+}

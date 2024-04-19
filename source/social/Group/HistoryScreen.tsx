@@ -30,7 +30,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
 
     const userData = useQuery(Users).filtered("userId IN $0", stringIds)
 
-    
+    //test comment
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {

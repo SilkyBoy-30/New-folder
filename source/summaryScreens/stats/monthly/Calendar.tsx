@@ -133,7 +133,7 @@ export const Calendar = (props: CalendarProps) => {
             setSelectedDay(day)
         }
     }
-//Hi
+
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
           mutableSubs.add(realm.objects(CardioWorkout));

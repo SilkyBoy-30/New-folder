@@ -62,6 +62,7 @@ export const MonthSummary = (props: MonthSummaryProps) => {
     const selectDay = (day:string) => {
         if(day == selectedDay)
         {
+            //console.log(selectedDay);
             setSelectedDay('')
             if(!showGeneralMonthlyStats)
             {
@@ -71,9 +72,11 @@ export const MonthSummary = (props: MonthSummaryProps) => {
         }
         else
         {
+            //console.log(selectedDay);
+            setSelectedDay(day)
             setStatsType('')
             setShowingStats(false)
-            setSelectedDay(day)
+
         }
 
         const newDate = new Date(year, month, Number(day))
@@ -132,13 +135,13 @@ export const MonthSummary = (props: MonthSummaryProps) => {
           mutableSubs.add(
             realm.objects(Workouts)
           );
+          //console.log(selectedDay);
         });
-      }, [realm, user]);
+      }, [realm, user, selectedDay]);
 
     return (
         <ScrollView>
             <Calendar onPress={selectDay} selectedMonth={props.selectedMonth}/>
-
             { showGeneralMonthlyStats &&
                 <View>
                 { 
@@ -156,9 +159,16 @@ export const MonthSummary = (props: MonthSummaryProps) => {
                 }
                 </View>
             }
-            { !showGeneralMonthlyStats &&
+            { !showGeneralMonthlyStats && (
                 <View>
-                    <Text style={styles.subtitle}>{selectedDay}{calculateDateEnding(selectedDay)}</Text>
+                    {selectedDay !== '' && (
+                    <Text style={[styles.subtitle, {fontStyle: 'italic', fontWeight: 'bold'}]}>
+                        {selectedDay}
+                        <Text style={{fontSize: 12}}>
+                            {calculateDateEnding(selectedDay)}
+                        </Text>
+                    </Text>
+                    )}
                     <View style={styles.smallBorder}></View>
                     {
                         (cardioData.length == 0 && resistanceData.length == 0) &&
@@ -181,7 +191,7 @@ export const MonthSummary = (props: MonthSummaryProps) => {
                         </TouchableOpacity>
                     }
                 </View>
-            }
+            )}
 
             {
             (!showGeneralMonthlyStats && statsType != '') &&
@@ -217,16 +227,16 @@ const styles = StyleSheet.create({
 
     subtitle: {
         textAlign: 'center',
-        fontSize: 20,
+        fontSize: 22,
     },
 
     smallBorder: {
-        width: 100,
+        width: 350,
         height: 2,
         backgroundColor: 'gray',
         marginRight: 'auto',
         marginLeft: 'auto',
-        marginBottom: 10,
+        marginBottom: 8,
     },
 
     text: {

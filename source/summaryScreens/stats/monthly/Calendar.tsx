@@ -23,7 +23,7 @@ export const Calendar = (props: CalendarProps) => {
     const year = currentDate.getFullYear()
     let month = currentDate.getMonth()
 
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun','Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'];
     let monthWord = monthNames[month];
 
     if(props.selectedMonth != -1)
@@ -60,29 +60,30 @@ export const Calendar = (props: CalendarProps) => {
 
     // Initialize an array to hold the calendar days
     const calendarDays = [];
+    const lastDayOfPrevMonth = new Date(year, month, 0).getDate();
+
+    // Get the number of days from the previous month to include
+    const numDaysFromPrevMonth = firstDayOfWeek;
+
+    // Get the number of days from the next month to include
+    const numDaysFromNextMonth = 35 - numDaysInMonth - numDaysFromPrevMonth;
 
     // Generate the calendar days
-    for (let i = 0; i < firstDayOfWeek; i++) {
-        calendarDays.push('');
-    }
-    for (let i = 1; i <= numDaysInMonth; i++) {
-        calendarDays.push(i);
+    // Days from the previous month
+    for (let i = lastDayOfPrevMonth - numDaysFromPrevMonth + 1; i <= lastDayOfPrevMonth; i++) {
+      calendarDays.push({ day: i, isCurrentMonth: false });
     }
 
-    if(calendarDays.length <= 35)
-    {
-      for(let i = calendarDays.length; i < 35; i++)
-      {
-        calendarDays.push('');
-      }
+    // Days from the current month
+    for (let i = 1; i <= numDaysInMonth; i++) {
+      calendarDays.push({ day: i, isCurrentMonth: true });
     }
-    else 
-    {
-      for(let i = calendarDays.length; i < 42; i++)
-      {
-        calendarDays.push('');
-      }
+
+    // Days from the next month
+    for (let i = 1; i <= numDaysFromNextMonth; i++) {
+      calendarDays.push({ day: i, isCurrentMonth: false });
     }
+
 
     
 
@@ -124,15 +125,15 @@ export const Calendar = (props: CalendarProps) => {
     //----------------------------------------------------------
     const [selectedDay, setSelectedDay] = useState<string>('none')
 
-    const selectDay = (day:string) => {
-        if(day == selectedDay)
-        {
-            setSelectedDay('none')
-        }
-        else{
-            setSelectedDay(day)
-        }
-    }
+    const selectDay = (day: string) => {
+      if (selectedDay === day) {
+          setSelectedDay('');
+      } else {
+          setSelectedDay(day);
+      }
+  };
+  
+  
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
@@ -147,57 +148,75 @@ export const Calendar = (props: CalendarProps) => {
           {
             props.selectedMonth == -1 &&
             <View>
-              <Text style={styles.title}>{monthWord} {year}</Text>
-              <View style={styles.smallBorder}></View>
+              <Text style={[styles.title, {fontWeight: '500'}, {marginBottom: 3.5}]}>{monthWord}</Text>
             </View>
             
           }
             
             <View style={styles.weekdays}>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>M</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>T</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>W</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>T</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>F</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>S</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>S</Text></View>
+              <View style={[styles.blueCircle, styles.weekday]}><Text style={{color: colors.blue, fontSize: 15}}>M</Text></View>
+              <View style={[styles.blueCircle, styles.weekday]}><Text style={{color: colors.blue, fontSize: 15}}>T</Text></View>
+              <View style={[styles.blueCircle, styles.weekday]}><Text style={{color: colors.blue, fontSize: 15}}>W</Text></View>
+              <View style={[styles.blueCircle, styles.weekday]}><Text style={{color: colors.blue, fontSize: 15}}>T</Text></View>
+              <View style={[styles.blueCircle, styles.weekday]}><Text style={{color: colors.blue, fontSize: 15}}>F</Text></View>
+              <View style={[styles.blueCircle, styles.weekday]}><Text style={{color: colors.blue, fontSize: 15}}>S</Text></View>
+              <View style={[styles.blueCircle, styles.weekday]}><Text style={{color: colors.blue, fontSize: 15}}>S</Text></View>
             </View>
         <View style={styles.container}>
             
-            {calendarDays.map((day, index) => (
-            <TouchableOpacity key={index} style={[styles.day, (selectedDay == day.toString() && styles.selectedDay)]} onPress={() => {props.onPress(day.toString()), selectDay(day.toString())}}>
-            <Text style={[styles.dayText, (currentDay == day && styles.currentDay)]}>{day || ' '}</Text>
-            {
-                mergedData[day] &&
-                <View style={styles.dots}>
-                    {
-                        mergedData[day].includes("Cardio") &&
-                        <View style={[styles.dot, {backgroundColor: colors.red}]}></View>
-                    }
-                    {
-                        mergedData[day].includes("Resistance") &&
-                        <View style={[styles.dot, {backgroundColor: colors.black}]}></View>
-                    }
-                </View>
+        {calendarDays.map(({day, isCurrentMonth}, index) => (
+    <TouchableOpacity
+    key={index}
+    style={[
+        styles.day,
+        !isCurrentMonth && styles.nonCurrentMonthDay, // Apply nonCurrentMonthDay style to days from previous and next months
+        (selectedDay === day.toString() && isCurrentMonth && styles.selectedDay)
+    ]}
+    onPress={() => {
+        if (isCurrentMonth) {
+            if (selectedDay === day.toString()) {
+                selectDay(''); // Deselect the current day if already selected
+            } else {
+                props.onPress(day.toString());
+                selectDay(day.toString());
             }
-            
-          </TouchableOpacity>
-        ))}
-      </View>
+        } else {
+            // Don't allow selection of days from the previous or next month
+            return;
+        }
+    }}
+>
+    <Text style={[styles.dayText, (parseInt(currentDay) === day && isCurrentMonth && styles.currentDay)]}>
+        {day || ' '}
+    </Text>
+    {mergedData[day] &&
+        <View style={styles.dots}>
+            {mergedData[day].includes("Cardio") &&
+                <View style={[styles.dot, { backgroundColor: 'red' }]}></View>
+            }
+            {mergedData[day].includes("Resistance") &&
+                <View style={[styles.dot, { backgroundColor: 'black' }]}></View>
+            }
         </View>
-        
-    )
+    }
+</TouchableOpacity>
 
+))}
+
+        </View>
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({
-    
+
     container: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginTop: 10,
-        marginBottom: 10,
+        paddingTop: 12,
+        paddingBottom: 7,
       },
+
       weekdays: {
         display: 'flex',
         flexDirection: 'row',
@@ -206,20 +225,19 @@ const styles = StyleSheet.create({
       },
 
       weekday: {
-        width: '14.28%', // 1/7th of the width for each day of the week
+        //width: '14.28%', // 1/7th of the width for each day of the week
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
-
+        alignItems: 'center',
+        marginHorizontal: 16.95,
       },
 
-      smallBorder: {
-        width: 100,
-        height: 2,
-        backgroundColor: 'gray',
-        marginRight: 'auto',
-        marginLeft: 'auto',
-        marginBottom: 10,
+      blueCircle: {
+        borderColor: colors.blue, 
+        borderWidth: 1, 
+        borderRadius: 50, 
+        width: 25, 
+        height: 25,
       },
 
       day: {
@@ -228,46 +246,62 @@ const styles = StyleSheet.create({
         aspectRatio: 1/1, // Ensure each day is square
         display: 'flex',
         alignItems: 'center',
-        borderColor: '#ccc',
-        borderWidth: 1,
+        //borderColor: '#696B5C',
+        //borderWidth: 1.2,
       },
+      
       dayText: {
-        fontSize: 16,
-        marginTop: 10,
+        fontSize: 21,
+        //marginTop: 3,
       },
 
       currentDay: {
-        color: 'blue'
+        color: '#2D46E8',
       },
 
       selectedDay: {
-        backgroundColor: 'yellow',
+        backgroundColor: '#ECD5AD',
+        //borderColor: '#000000',
+        marginHorizontal: 11.9,
+        //borderWidth: 1, 
+        borderRadius: 50, 
+        width: 35, 
+        height: 35,
+      },
+
+      nonCurrentMonthDay: {
+        backgroundColor: '#C7C9C0', // Gray out non-current month days
+        borderColor: '#C7C9C0',
+        marginHorizontal: 11.9,
+        borderWidth: 1, 
+        borderRadius: 35/2, 
+        width: 35, 
+        height: 35,
       },
 
       title: {
         textAlign: 'center',
-        fontSize: 20,
-        marginTop: 10,
+        fontSize: 24,
+        marginTop: 5,
       },
 
       dots: {
-        position: 'absolute',
-        bottom: 5,
-        width: '90%',
-        marginRight: 'auto',
-        marginLeft: 'auto',
+        position: 'relative',
+        bottom: -7,
+        width: 35,
+        //marginRight: 'auto',
+        //marginLeft: 'auto',
 
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-evenly',
-
       },
 
       dot: {
-        width: 5,
-        height: 5,
+        width: 10,
+        height: 10,
         backgroundColor: 'black',
-        borderRadius: 5,
+        borderRadius: 8,
       }
     });
-    
+
